@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator.js')
+const bcrypt = require('bcrypt')
 const userschema = mongoose.Schema({
     username:{
         type:String,
@@ -18,15 +19,11 @@ const userschema = mongoose.Schema({
             message:"please enter password in small word and length between 8 and 10"
         }
     },
-    confirmpassword:{
-        type:String,
-        maxLength:10,
-        minLength:8,
-        validate:function (value){
-            return this.password === value
-        },
-        message:"password must be match with the confirm password"
-    },
+    confirmpassword: {
+        type: String,
+        maxLength: 10,
+        minLength: 8,
+      },
     email:{
         type:String,
         required:true
@@ -38,5 +35,26 @@ const userschema = mongoose.Schema({
         minLength:10
     }
 },{timestamps:true})
+userschema.pre('save',function (next){
+    if(this.isModified('password')|| this.isNew()){
+        const hashpassword = bcrypt.hashSync(this.password,10);
+        this.password = hashpassword;
+        if(this.password!== this.confirmpassword){
+            
+            const err = new Error('password and confirm password not matched');
+        next(err)
+        }
+        else{
+        next();
+        }
+    }
+    else{
+        next()
+    }
+})
+userschema.methods.comparepass = async function (password,passworddb){
+    return await bcrypt.compare(password,passworddb);
+}
+
 const User = mongoose.model('user',userschema);
 module.exports = User;
