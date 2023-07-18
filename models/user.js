@@ -21,8 +21,15 @@ const userschema = mongoose.Schema({
     },
     confirmpassword: {
         type: String,
+        required:true,
         maxLength: 10,
         minLength: 8,
+        validate:{
+            validator:function (value){
+                return this.parent().password == value
+            },
+            message:"password must match with the confirm password"
+        }
       },
     email:{
         type:String,
@@ -39,14 +46,7 @@ userschema.pre('save',function (next){
     if(this.isModified('password')|| this.isNew()){
         const hashpassword = bcrypt.hashSync(this.password,10);
         this.password = hashpassword;
-        if(this.password!== this.confirmpassword){
-            
-            const err = new Error('password and confirm password not matched');
-        next(err)
-        }
-        else{
-        next();
-        }
+        next()
     }
     else{
         next()
