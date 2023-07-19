@@ -70,6 +70,7 @@ module.exports = {
   addblog: async (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
+    const currentuser = await User.findOne({_id:req.session.user._id})
     if (!title) {
       const err = new Error(
         "title not found please provide title of your content",
@@ -89,12 +90,15 @@ module.exports = {
       content: content,
       author: req.session.user._id,
     });
-    const savedblog = blog
+   blog
       .save()
-      .then(() => {
+      .then(async (savedblog) => {
+        const blogid = savedblog._id;
+        const newuser = await User.findByIdAndUpdate(req.session.user._id,{$push:{blogs:blogid}})
         res.status(200).json({
           message: "blog add successfully",
           blog: savedblog,
+          newuser
         });
       })
       .catch((err) => {
@@ -120,7 +124,7 @@ module.exports = {
     }
   },
   allblogs: async (req, res) => {
-    const allblogs = await Blog.aggregate([
+    const allblogs = await Blog.aggregate([{$match:{isDeleted:false}},
       {
         $group: {
           _id: "$_id",
@@ -172,7 +176,20 @@ module.exports = {
     console.log(__dirname+'/public/googlesign.html')
     res.sendFile(path.join(__dirname+'./../public/googlesign.html'))
   },
-  deleteblog:async (req,res)=>{
-    
+  deleteblog:async (req,res,next)=>{
+    try {
+      const blogid = req.params.id;
+      const deleteblog = await Blog.findByIdAndUpdate({_id:blogid},{isDeleted:true});
+      if(!deleteblog){
+       const err = new Error('somthing wrong',500)
+       next(err);
+      }
+      res.status(200).json({
+        message:"blog deleted",
+        deleteblog
+      })
+    } catch (error) {
+      next(error)
+    }
   }
 };

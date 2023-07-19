@@ -18,7 +18,11 @@ const blogschema = mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
         ref:'user'
         }
-    }]
+    }],
+    isDeleted:{
+        type:Boolean,
+        default:0
+    }
 },{timestamp:true})
 const Blog = mongoose.model('blog',blogschema);
 module.exports = Blog;

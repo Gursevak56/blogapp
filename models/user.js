@@ -41,6 +41,10 @@ const userschema = mongoose.Schema({
         maxLength:12,
         minLength:10
     },
+    blogs:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'blog'
+    }],
     googleId:{
         type:String
     },

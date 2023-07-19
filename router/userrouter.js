@@ -16,5 +16,5 @@ router.post('/comment/:id',authenticate.islogin,usercontroller.comment)
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email','https://www.googleapis.com/auth/user.phonenumbers.read']}));
 router.get('/callback',passport.authenticate('google',{successRedirect:'/profile',failureRedirect:'/signup'}))
 router.get('/profile',usercontroller.profile);
-router.delete('/deleteblog',authenticate.isadmin||authenticate.userauthorizationl,usercontroller.deleteblog)
+router.put('/deleteblog/:id',authenticate.isadmin||authenticate.userauthorizationl,usercontroller.deleteblog)
 module.exports = router;
