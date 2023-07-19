@@ -4,11 +4,11 @@ const bcrypt = require('bcrypt')
 const userschema = mongoose.Schema({
     username:{
         type:String,
-        required:true
+        required:false
     },
     password:{
         type:String,
-        required:true,
+        required:false,
         maxLength:10,
         minLength:8,
         validate:{
@@ -21,7 +21,7 @@ const userschema = mongoose.Schema({
     },
     confirmpassword: {
         type: String,
-        required:true,
+        required:false,
         maxLength: 10,
         minLength: 8,
         validate:{
@@ -33,17 +33,24 @@ const userschema = mongoose.Schema({
       },
     email:{
         type:String,
-        required:true
+        required:false
     },
     phoneNumber:{
         type:String,
-        required:true,
+        required:false,
         maxLength:12,
         minLength:10
+    },
+    googleId:{
+        type:String
+    },
+    isadmin:{
+        type:Boolean,
+        default:false
     }
 },{timestamps:true})
 userschema.pre('save',function (next){
-    if(this.isModified('password')|| this.isNew()){
+    if(this.isModified('password')){
         const hashpassword = bcrypt.hashSync(this.password,10);
         this.password = hashpassword;
         next()
