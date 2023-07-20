@@ -1,3 +1,4 @@
+const errorhandler = require('./errorhandler')
 const islogin = async (req,res,next)=>{
     if(req.session.user){
         next()
@@ -9,8 +10,8 @@ const islogin = async (req,res,next)=>{
 }
 const islogout = async (req,res,next)=>{
     if(req.session.user){
-        const err = new Error('user is online',400)
-        next(err);
+        const err = new errorhandler("you are already online",403,'wrong request',{addtionaldata:'please enjoy your session'});
+        next(err)
     }
     else{
         next();

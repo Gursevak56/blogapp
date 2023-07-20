@@ -1,5 +1,6 @@
 const User = require("./../models/user");
 const Blog = require("./../models/blog");
+const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 module.exports = {
   signup: async (req, res, next) => {
@@ -9,13 +10,12 @@ module.exports = {
       const checkuser = await User.findOne({ email: req.body.email });
       console.log(checkuser);
       if (checkuser !== null) {
-        res.status(200).json({
-          message: "user already exists",
-        });
+        const err = new errorhandler("user already exists",403,'BAD REQUEST',{addtionaldata:'please sign in because you already registerd'});
+        next(err)
       }
       console.log("it is a else block");
       const newuser = new User({
-        username: req.body.username,
+        username: req.body.username, 
         password: req.body.password,
         confirmpassword: req.body.confirmpassword,
         email: req.body.email,
@@ -39,16 +39,16 @@ module.exports = {
       const email = req.body.email;
       const checkuser = await User.findOne({ email: email });
       if (!checkuser) {
-        const err = new Error("user not found", 404);
-        next(err);
+        const err = new errorhandler("user Not found",404,'NOT FOUND',{addtionaldata:'please enter right information'});
+        next(err)
       }
       const passwordcheck = await checkuser.comparepass(
         req.body.password,
         checkuser.password
       );
       if (!passwordcheck) {
-        const err = new Error("your password is incorrect", 403);
-        next(err);
+        const err = new errorhandler("wrong password",403,'password not match',{addtionaldata:'Your email or password incorrect'});
+        next(err)
       }
       req.session.user = checkuser;
       console.log(req.session.user._id);
@@ -72,18 +72,12 @@ module.exports = {
     const content = req.body.content;
     const currentuser = await User.findOne({_id:req.session.user._id})
     if (!title) {
-      const err = new Error(
-        "title not found please provide title of your content",
-        404
-      );
-      next(err);
+      const err = new errorhandler("title not found",404,'NOT FOUND',{addtionaldata:'please provide title of your blog'});
+      next(err)
     }
     if (!content) {
-      const err = new Error(
-        "content not found please provide a minimum amount of content to fullfill your blog",
-        404
-      );
-      next(err);
+      const err = new errorhandler("content not found",404,'NOT FOUND',{addtionaldata:'please enter specific amount of content data'});
+        next(err)
     }
     const blog = new Blog({
       title: title,
@@ -119,8 +113,8 @@ module.exports = {
         like,
       });
     } else {
-      const err = new Error("something wrong", 400);
-      next(err);
+      const err = new errorhandler("somthing went wrong",500,'INTERNAL SERVER ERROR',{addtionaldata:'SOME INTER ISSUE'});
+        next(err)
     }
   },
   allblogs: async (req, res) => {
@@ -149,13 +143,13 @@ module.exports = {
     console.log(comment)
     if(!comment)
     {
-      const err = new Error('comment not found please write some for a understandable think',404)
-      next(err);
+      const err = new errorhandler("comment not found blank comment not acceptable",403,'BAD REQUEST',{addtionaldata:'please write some comment'});
+        next(err)
     }
     const commentedblog = await Blog.findByIdAndUpdate(blogid,{$push:{comment:{content:comment,author:req.session.user._id}}});
     if(!commentedblog){
-      const err = new Error('something wrong',500);
-      next(err);
+      const err = new errorhandler("somthing went wrong",500,'INTERNAL SERVER ERROR',{addtionaldata:'SOME INTER ISSUE'});
+        next(err)
     }
     res.status(200).json({
       message:"you comment on this blog",
@@ -181,8 +175,8 @@ module.exports = {
       const blogid = req.params.id;
       const deleteblog = await Blog.findByIdAndUpdate({_id:blogid},{isDeleted:true});
       if(!deleteblog){
-       const err = new Error('somthing wrong',500)
-       next(err);
+        const err = new errorhandler("somthing went wrong",500,'INTERNAL SERVER ERROR',{addtionaldata:'SOME INTER ISSUE'});
+        next(err)
       }
       res.status(200).json({
         message:"blog deleted",

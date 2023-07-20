@@ -8,6 +8,7 @@ const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userrouter = require('./router/userrouter')
 const User = require('./models/user');
+const errorhandler = require('./middleware/errorhandler');
 // const errorhandler = require('./middleware/errorhandler');
 const cookieParser = require('cookie-parser');
 const app =express();
@@ -37,11 +38,15 @@ app.use(passport.session())
 //routers
 app.use('/',userrouter);
 app.use((err,req,res,next)=>{
-    res.status(404).json({
-        status:'fail',
-        message:err.message
-    })
-    next();
+    if(err instanceof errorhandler){
+        res.status(err.statuscode).json({
+            message:err.message,
+            status:'error',
+            statuscode: err.statuscode,
+            errorcode:err.errorcode,
+            errordata:err.errordata
+        })
+    }
 })
 passport.use(new GoogleStrategy({
     clientID:process.env.CLIENT_ID,
