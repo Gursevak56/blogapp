@@ -4,7 +4,7 @@ const islogin = async (req,res,next)=>{
         next()
     }
     else{
-        const err = new Error('user is offline',400);
+        const err = new errorhandler('please login to continue',400);
         next(err);
     }
 }
