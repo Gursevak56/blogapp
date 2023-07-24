@@ -1,4 +1,4 @@
-const User = require("./../models/user");
+const User = require("./../models/user.ts");
 const Blog = require("./../models/blog");
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
@@ -31,7 +31,6 @@ module.exports = {
       res.status(400).json({
         message: error.message,
       });
-      console.log(error);
     }
   },
   signin: async (req, res, next) => {

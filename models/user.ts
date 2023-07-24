@@ -13,8 +13,8 @@ const userschema = mongoose.Schema({
         minLength:8,
         validate:{
             validator:function (value){
-                const passRegex = /[a-z]/
-                passRegex.test(value)
+                const passRegex = /^(?=.*[~!@#$%^&*()+?])(?=.*[A-Za-z])(?=.*[0-9]).{8,10}$/
+                return passRegex.test(value)
             },
             message:"please enter password in small word and length between 8 and 10"
         }
@@ -34,13 +34,26 @@ const userschema = mongoose.Schema({
       },
     email:{
         type:String,
-        required:false
+        required:true,
+        validate:{
+            validator:function (value){
+                const emailRegex = /^(?=.*@)[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+                return emailRegex.test(value)
+            },
+            message:"email must have @ and number"
+        }
     },
     phoneNumber:{
         type:String,
         required:false,
-        maxLength:12,
-        minLength:10
+        validate:{
+            validator:function (value){
+                const phoneRegex = /^\+\d{1,3}-\d{3}-\d{4}$|^\+\d{1,3}\d{10}$/;
+                return phoneRegex.test(value);
+            },
+            message:"phone number must have + sign and country code"
+        }
     },
     blogs:[{
         type:mongoose.Schema.Types.ObjectId,
