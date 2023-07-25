@@ -1,13 +1,10 @@
-const User = require("./../models/user.ts");
+const User = require("./../models/user.js");
 const Blog = require("./../models/blog");
-<<<<<<< HEAD
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken')
-=======
 const errorhandler = require("./../middleware/errorhandler");
 const path = require("path");
->>>>>>> feature/auth
 module.exports = {
   signup: async (req, res, next) => {
     try {
