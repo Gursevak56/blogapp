@@ -22,7 +22,7 @@ const isadmin = async (req,res,next)=>{
         next()
     }
     else{
-        const err = new Error('you have not permission to access this module')
+        const err = new errorhandler('you have not permission to access this module',403)
         next(err);
     }
 
