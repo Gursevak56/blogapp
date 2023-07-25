@@ -19,7 +19,7 @@ console.log(dburl)
 mongoose.connect(dburl,{useNewUrlParser:true}).then(()=>{
     console.log("user connected successfully");
 }).catch((err)=>{
-    console.log(err.message);
+    console.log(err.message)
 })
 //Third party middlewares
 app.use(express.static('public'))
@@ -31,7 +31,10 @@ app.use(cookieParser())
 app.use(session({
     secret:process.env.SESSION_SECRET,
     saveUninitialized:false,
-    resave:false
+    resave:false,
+    cookie:{
+        maxAge:60*1000
+    }
 }))
 app.use(passport.initialize());
 app.use(passport.session())

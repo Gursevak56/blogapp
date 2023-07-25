@@ -2,6 +2,7 @@ const User = require("./../models/user");
 const Blog = require("./../models/blog");
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
+const jwt = require('jsonwebtoken')
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -51,10 +52,12 @@ module.exports = {
         next(err)
       }
       req.session.user = checkuser;
+      const token = await jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
       console.log(req.session.user._id);
       res.status(200).json({
         message: "user log in successfully",
         user: checkuser,
+        token,
         cookies: req.cookies,
       });
     } catch (error) {
