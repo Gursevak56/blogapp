@@ -56,7 +56,7 @@ const userschema = mongoose.Schema({
         }
     },
     blogs:[{
-        type:mongoose.Schema.Types.DocumentArray,
+        type:mongoose.Schema.Types.ObjectId,
         ref:'blog'
     }],
     googleId:{

@@ -3,8 +3,6 @@ const Blog = require("./../models/blog");
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken')
-const errorhandler = require("./../middleware/errorhandler");
-const path = require("path");
 module.exports = {
   signup: async (req, res, next) => {
     try {
