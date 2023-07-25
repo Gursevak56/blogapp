@@ -7,7 +7,7 @@ const morgan = require('morgan');
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const userrouter = require('./router/userrouter')
-const User = require('./models/user.ts');
+const User = require('./models/user.js');
 const errorhandler = require('./middleware/errorhandler');
 // const errorhandler = require('./middleware/errorhandler');
 const cookieParser = require('cookie-parser');
@@ -54,7 +54,7 @@ app.use((err,req,res,next)=>{
 passport.use(new GoogleStrategy({
     clientID:process.env.CLIENT_ID,
     clientSecret:process.env.CLIENT_SECRET,
-    callbackURL:'http://localhost:3001/callback'
+    callbackURL:'http://localhost:3000/callback'
 },(accesstoken,refereshtoken,profile,done)=>{
      User.findOne({googleId:profile.id}).then(user=>{
         if(user){

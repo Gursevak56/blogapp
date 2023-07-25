@@ -1,4 +1,4 @@
-const User = require("./../models/user.ts");
+const User = require("./../models/user.js");
 const Blog = require("./../models/blog");
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
