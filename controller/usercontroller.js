@@ -78,6 +78,7 @@ module.exports = {
       const err = new errorhandler("title not found",404,'NOT FOUND',{addtionaldata:'please provide title of your blog'});
       next(err)
     }
+    if(title === currentuser)
     if (!content) {
       const err = new errorhandler("content not found",404,'NOT FOUND',{addtionaldata:'please enter specific amount of content data'});
         next(err)
