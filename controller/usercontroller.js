@@ -2,9 +2,8 @@ const User = require("./../models/user.js");
 const Blog = require("./../models/blog");
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
-const jwt = require('jsonwebtoken')
-const errorhandler = require("./../middleware/errorhandler");
-const path = require("path");
+const jwt = require('jsonwebtoken');
+const { json } = require("body-parser");
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -85,6 +84,7 @@ module.exports = {
   },
   addblog: async (req, res, next) => {
     const title = req.body.title;
+    console.log(title)
     const content = req.body.content;
     const currentuser = await User.findOne({ _id: req.session.user._id });
     if (!title) {
@@ -93,7 +93,17 @@ module.exports = {
       });
       next(err);
     }
-    if(title === currentuser)
+   for(let i =0;i<currentuser.blogs.length;i++){
+    const blogid =  currentuser.blogs[i];
+    const blog = await Blog.findOne({_id:blogid})
+     if(blog){
+      console.log(blog.title)
+      if(title == blog.title){
+        const err = new errorhandler("Blog already exists",403);
+       next(err);
+      }
+     }
+   }
     if (!content) {
       const err = new errorhandler("content not found", 404, "NOT FOUND", {
         addtionaldata: "please enter specific amount of content data",
