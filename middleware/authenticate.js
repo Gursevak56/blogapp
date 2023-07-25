@@ -18,7 +18,11 @@ const islogin = async (req,res,next)=>{
         
     }
     else{
+<<<<<<< HEAD
         const err = new errorhandler('user is offline',400);
+=======
+        const err = new errorhandler('please login to continue',400);
+>>>>>>> feature/auth
         next(err);
     }
 }
