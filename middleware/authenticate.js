@@ -3,10 +3,14 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken')
 const islogin = async (req,res,next)=>{
     if(req.session.user){
-        const token = req.headers('Authorization');
-        if(token && token.startsWith('Bearer')){
-            token = token.split(' ')[1];
-          const verifyedtoken = await jwt.verify(token,process.env.JWT_SECRET);
+        const token = req.headers['authorization'];
+        if(!token){
+            const err = new errorhandler("token not found ",400)
+            next(err)
+        }
+        if(token &&  (token.startsWith('Bearer'))){
+          const token2 = token.split(' ')[1];
+          const verifyedtoken = await jwt.verify(token2,process.env.JWT_SECRET);
           if(!verifyedtoken){
             const err = errorhandler('token not verified',403);
             next(err)
@@ -18,8 +22,8 @@ const islogin = async (req,res,next)=>{
         
     }
     else{
-        const err = new errorhandler('user is offline',400);
-        
+     
+        const err = new errorhandler('please login to continue',400);
         next(err);
     }
 }
