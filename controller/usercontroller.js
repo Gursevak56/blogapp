@@ -4,6 +4,7 @@ const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken');
 const { json } = require("body-parser");
+const {client} = require('@elastic/elasticsearch');
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -65,6 +66,7 @@ module.exports = {
       }
       req.session.user = checkuser;
       const token = await jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
+      req.user=checkuser;
       console.log(req.session.user._id);
       res.status(200).json({
         message: "user log in successfully",
@@ -218,7 +220,8 @@ module.exports = {
   },
   home: async (req, res) => {
     console.log(__dirname + "/public/googlesign.html");
-    res.sendFile(path.join(__dirname + "./../public/googlesign.html"));
+    res.render(path.join(__dirname + "./../public/googlesign.ejs"),{user:req.session.user});
+    
   },
   deleteblog: async (req, res, next) => {
     try {
@@ -244,4 +247,20 @@ module.exports = {
       next(error);
     }
   },
+  searchdata:async (req,res,next)=>{
+    const elasticsearch = client({
+      Node:"http://localhost:9200/"
+    })
+    const query = req.body.query;
+    const response = await client.search({
+      body:{
+        query:{
+          match:{content:query}
+        }
+      }
+    })
+    res.json({
+      data:response.hits.hits
+    })
+  }
 };

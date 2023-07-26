@@ -47,13 +47,13 @@ const userschema = mongoose.Schema({
     phoneNumber:{
         type:String,
         required:false,
-        validate:{
-            validator:function (value){
-                const phoneRegex = /^\+\d{1,3}-\d{3}-\d{4}$|^\+\d{1,3}\d{10}$/;
-                return phoneRegex.test(value);
-            },
-            message:"phone number must have + sign and country code"
-        }
+        // validate:{
+        //     validator:function (value){
+        //         const phoneRegex = /^\+\d{1,3}-\d{3}-\d{4}$|^\+\d{1,3}\d{10}$/;
+        //         return phoneRegex.test(value);
+        //     },
+        //     message:"phone number must have + sign and country code"
+        // }
     },
     blogs:[{
         type:mongoose.Schema.Types.ObjectId,
