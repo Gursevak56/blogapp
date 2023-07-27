@@ -1,10 +1,16 @@
 const mongoose = require('mongoose')
 const validator = require('validator.js')
 const bcrypt = require('bcrypt')
+const { Client } = require('@elastic/elasticsearch');
+
+const client = new Client({ node: 'http://localhost:9200',auth:{
+
+} });
 const userschema = mongoose.Schema({
     username:{
         type:String,
-        required:false
+        required:true,
+        index:true
     },
     password:{
         type:String,
@@ -80,6 +86,23 @@ userschema.pre('save',function (next){
 userschema.methods.comparepass = async function (password,passworddb){
     return await bcrypt.compare(password,passworddb);
 }
+userschema.statics.search = async (query)=>{
+    try {
+        const response = await client.search({
+            index:'username',
+            body:{
+                query:{
+                    match:{query}
+                }
+            }
+        })
+        return response.hits[0].hits;
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 
 const User = mongoose.model('user',userschema);
 module.exports = User;
