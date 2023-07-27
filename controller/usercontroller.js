@@ -264,7 +264,7 @@ module.exports = {
         }
       })
       console.log(searchresponse)
-      res.json({data:searchresponse.hits.hits})
+      res.json({data:searchresponse.hits.hits._source})
     }
     catch (error) {
       console.log(error.message)
