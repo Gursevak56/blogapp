@@ -5,7 +5,7 @@ const path = require('path')
 const jwt = require('jsonwebtoken');
 const { json } = require("body-parser");
 const { Client } = require('@elastic/elasticsearch');
-
+const createbulk = require('./../middleware/createbulk.js')
 const client = new Client({ node: 'http://localhost:9200' });
 module.exports = {
   signup: async (req, res, next) => {
@@ -249,18 +249,25 @@ module.exports = {
       next(error);
     }
   },
-  searchdata:async (req,res,next)=>{
-    const query = req.body.query;
-    const {body:response} = await client.search({
-      index:"username",
-      body:{
-        query:{
-          match:{
-            username:'gursevak'
+  searchdata: async (req,res)=>{
+    try {
+      const q = req.body.query;
+      await createbulk();
+      const {body:searchresponse} = await client.search({
+        index:"data",
+        body:{
+          query:{
+            match:{
+              username:q
+            }
           }
         }
-      }
-    })
-    console.log(response.hits.hits)
+      })
+      console.log(searchresponse)
+      res.json({data:searchresponse.hits.hits})
+    }
+    catch (error) {
+      console.log(error.message)
+    }
   }
-};
+}
