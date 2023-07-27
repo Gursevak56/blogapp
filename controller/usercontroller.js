@@ -5,11 +5,6 @@ const path = require('path')
 const jwt = require('jsonwebtoken');
 const { json } = require("body-parser");
 const { Client } = require('@elastic/elasticsearch');
-<<<<<<< HEAD
-=======
-
-const client = new Client({ node: 'http://localhost:9200' });
->>>>>>> dev
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -253,13 +248,10 @@ module.exports = {
     }
   },
   searchdata:async (req,res,next)=>{
-<<<<<<< HEAD
     const client = new Client({
       // Elasticsearch server configuration
       node: 'http://localhost:9200', // Replace with your Elasticsearch server URL
     });
-=======
->>>>>>> dev
     const query = req.body.query;
     const {body:response} = await client.search({
       index:"username",
