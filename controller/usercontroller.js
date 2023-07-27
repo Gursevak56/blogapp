@@ -4,7 +4,9 @@ const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken');
 const { json } = require("body-parser");
-const {client} = require('@elastic/elasticsearch');
+const { Client } = require('@elastic/elasticsearch');
+
+const client = new Client({ node: 'http://localhost:9200' });
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -248,19 +250,17 @@ module.exports = {
     }
   },
   searchdata:async (req,res,next)=>{
-    const elasticsearch = client({
-      Node:"http://localhost:9200/"
-    })
     const query = req.body.query;
-    const response = await client.search({
+    const {body:response} = await client.search({
+      index:"username",
       body:{
         query:{
-          match:{content:query}
+          match:{
+            username:'gursevak'
+          }
         }
       }
     })
-    res.json({
-      data:response.hits.hits
-    })
+    console.log(response.hits.hits)
   }
 };
