@@ -1,5 +1,6 @@
 const User = require("./../models/user.js");
 const Blog = require("./../models/blog");
+const Otp = require('./../models/otp.js')
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken');
@@ -34,7 +35,7 @@ module.exports = {
         next(err);
       } 
       if(saveduser){
-       emailVerification(saveduser.email,saveduser.username);
+    emailVerification.verifyemail(saveduser.email,saveduser.username);
         res.status(200).json({
           message: "you are registered successfully please verify your email",
           user: saveduser,

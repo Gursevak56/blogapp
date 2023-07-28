@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const Otp = require('./../models/otp');
 require('dotenv').config();
 const verifyemail = async (email,name)=>{
     const transporter = nodemailer.createTransport({
@@ -24,13 +25,21 @@ const verifyemail = async (email,name)=>{
         }
     })
 }
+let sentotp ='';
 const genrateotp =  ()=>{
     let otplength = 6;
    let otp ='';
     for(let i =1;i<6;i++){
     otp = otp + Math.floor(Math.random() *  10);
     }
+    const savedotp = new Otp({
+        otp:otp
+    })
+    savedotp.save();
     return otp;
 }
 console.log(genrateotp());
-module.exports = verifyemail;
+module.exports = {
+    verifyemail,
+    sentotp
+}
