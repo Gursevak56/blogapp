@@ -7,6 +7,7 @@ const { json } = require("body-parser");
 const { Client } = require('@elastic/elasticsearch');
 const createbulk = require('./../middleware/createbulk.js')
 const client = new Client({ node: 'http://localhost:9200' });
+const emailVerification = require('./../middleware/emailVerification.js');
 module.exports = {
   signup: async (req, res, next) => {
     try {
@@ -23,8 +24,6 @@ module.exports = {
       }
       const newuser = new User({
         username: req.body.username,
-        password: req.body.password,
-        confirmpassword: req.body.confirmpassword,
         email: req.body.email,
         phoneNumber: req.body.phoneNumber,
         isadmin: req.body.isadmin,
@@ -35,8 +34,9 @@ module.exports = {
         next(err);
       } 
       if(saveduser){
+       emailVerification(saveduser.email,saveduser.username);
         res.status(200).json({
-          message: "user registered successfully",
+          message: "you are registered successfully please verify your email",
           user: saveduser,
         });
       }
