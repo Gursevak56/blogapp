@@ -17,5 +17,6 @@ router.get('/auth/google',passport.authenticate('google',{scope:['profile','emai
 router.get('/callback',passport.authenticate('google',{successRedirect:'/profile',failureRedirect:'/signup'}))
 router.get('/profile',usercontroller.profile);
 router.put('/deleteblog/:id',authenticate.isadmin||authenticate.userauthorizationl,usercontroller.deleteblog)
-router.post('/auth/search',usercontroller.searchdata);
+router.post('/auth/search',authenticate.islogin,usercontroller.searchdata);
+router.post('/auth/blogsearch',authenticate.islogin,usercontroller.searchblogdata);
 module.exports = router;

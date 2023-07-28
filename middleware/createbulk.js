@@ -1,6 +1,7 @@
 // createbulk.js
 
 const User = require('./../models/user');
+const Blog = require('./../models/blog')
 const { Client } = require('@elastic/elasticsearch');
 
 const client = new Client({ node: 'http://localhost:9200' });
@@ -41,4 +42,36 @@ const createbulk = async () => {
   }
 };
 
-module.exports = createbulk;
+const createBlogBluk = async ()=>{
+try {
+    const blogs = await Blog.find();
+    const body = blogs.flatMap((doc)=>[
+        {
+            index:{_index:'blog',_id:doc._id.toString()}
+        },
+        {
+            title:doc.title,
+            content:doc.content
+
+        }
+    ])
+    if(body.length>0){
+        console.log('body create successfully');
+        const response = await client.bulk({body:body,refresh:true});
+        if(response.errors){
+            console.log(response.errors.items);
+        }
+        else{
+            console.log(response)
+        }
+    }
+    else{
+        console.log("no blog found")
+    }
+} catch (error) {
+    console.log(error.message)
+}
+}
+
+module.exports = {createbulk,createBlogBluk
+}

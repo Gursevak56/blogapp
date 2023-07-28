@@ -67,15 +67,17 @@ module.exports = {
         next(err);
       }
       req.session.user = checkuser;
+      if(req.session.user){
       const token = await jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
       req.user=checkuser;
       console.log(req.session.user._id);
       res.status(200).json({
         message: "user log in successfully",
-        user: checkuser,
+        user: req.session.user,
         token,
         cookies: req.cookies,
       });
+    }
     } catch (error) {
       next(error);
     }
@@ -252,7 +254,7 @@ module.exports = {
   searchdata: async (req,res)=>{
     try {
       const q = req.body.query;
-      await createbulk();
+      await createbulk.createbulk();
       const {body:searchresponse} = await client.search({
         index:"data",
         body:{
@@ -264,10 +266,33 @@ module.exports = {
         }
       })
       console.log(searchresponse)
-      res.json({data:searchresponse.hits.hits._source})
+      res.json({data:searchresponse.hits.hits})
     }
     catch (error) {
       console.log(error.message)
     }
-  }
+  },
+  searchblogdata:async (req,res,next)=>{
+    try {
+      await createbulk.createBlogBluk()
+    const title = req.body.title;
+    const content = req.body.content;
+    const {body:response } = await client.search({
+      index:'blog',
+      body:{
+        query:{
+          match:{
+            // title:title,
+             content:content
+          }
+        }
+      }
+    })
+    console.log(response.hits.hits);
+    res.json({data:response.hits.hits})
+  
+    } catch (error) {
+      console.log(error.message);
+    }
+}
 }

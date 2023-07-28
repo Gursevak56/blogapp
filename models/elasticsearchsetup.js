@@ -3,6 +3,7 @@ const { Client } = require('@elastic/elasticsearch');
 const client = new Client({ node: 'http://localhost:9200' });
 const User = require('./user');
 const { text } = require('body-parser');
+const errorhandler = require('../middleware/errorhandler');
 
 const createindex = async () => {
   try {
@@ -24,7 +25,7 @@ const createindex = async () => {
   }
 };
 
- createindex();
+//  createindex();
 const gettitle = async ()=>{
   const response = await client.get({
     index:"users",
@@ -72,3 +73,26 @@ console.log(response)
 //     console.log(error.message);
 //   }
 //};
+const createBlogIndex = async (next) => {
+  try {
+    const response = await client.indices.create({
+      index: 'blog',
+      body: {
+        mappings: {
+          properties: {
+            title: { type: 'text' },
+            content: { type: 'text' },
+          },
+        },
+      },
+    });
+
+    console.log(response);
+  } catch (error) {
+    console.log(error.meta.body.error);
+  }
+};
+
+
+
+createBlogIndex()
