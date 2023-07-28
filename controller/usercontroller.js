@@ -11,9 +11,7 @@ module.exports = {
   signup: async (req, res, next) => {
     try {
       const email = req.body.email;
-      console.log(email);
       const checkuser = await User.findOne({ email: req.body.email });
-      console.log(checkuser);
       if (checkuser !== null) {
         const err = new errorhandler(
           "user already exists",
@@ -23,7 +21,6 @@ module.exports = {
         );
         next(err);
       }
-      console.log("it is a else block");
       const newuser = new User({
         username: req.body.username,
         password: req.body.password,
@@ -33,14 +30,18 @@ module.exports = {
         isadmin: req.body.isadmin,
       });
       const saveduser = await newuser.save();
-      res.status(200).json({
-        message: "user registered successfully",
-        user: saveduser,
-      });
+      if(!saveduser){
+        const err = new errorhandler('user not saved');
+        next(err);
+      } 
+      if(saveduser){
+        res.status(200).json({
+          message: "user registered successfully",
+          user: saveduser,
+        });
+      }
     } catch (error) {
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error)
     }
   },
   signin: async (req, res, next) => {
@@ -68,7 +69,7 @@ module.exports = {
       }
       req.session.user = checkuser;
       if(req.session.user){
-      const token = await jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
+      const token =  jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
       req.user=checkuser;
       console.log(req.session.user._id);
       res.status(200).json({
@@ -138,7 +139,7 @@ module.exports = {
         next(err);
       });
   },
-  like: async (req, res) => {
+  like: async (req, res,next) => {
     const blogid = req.params.id;
     console.log(blogid);
     const like = await Blog.findByIdAndUpdate(
