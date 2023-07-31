@@ -19,4 +19,5 @@ router.get('/profile',usercontroller.profile);
 router.put('/deleteblog/:id',authenticate.isadmin||authenticate.userauthorization,usercontroller.deleteblog)
 router.post('/auth/search',authenticate.islogin,usercontroller.searchdata);
 router.post('/auth/blogsearch',authenticate.islogin,usercontroller.searchblogdata);
+router.get('/razorpay',authenticate.islogin,usercontroller.razorpay);
 module.exports = router;

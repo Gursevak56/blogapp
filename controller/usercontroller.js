@@ -10,6 +10,7 @@ const createbulk = require('./../middleware/createbulk.js')
 const client = new Client({ node: 'http://localhost:9200' });
 const emailVerification = require('./../middleware/emailVerification.js');
 var admin = require("firebase-admin");
+const razorpay = require('razorpay');
 
 var serviceAccount = require("./../middleware/blog-application-393304-firebase-adminsdk-a8fm8-c5500e9d6c.json");
 
@@ -312,5 +313,12 @@ module.exports = {
     } catch (error) {
       console.log(error.message);
     }
+},
+razorpay:async (req,res,next)=>{
+  try {
+    const instance = new razorpay(process.env.KEY_ID,process.env.KEY_SECRET)
+  } catch (error) {
+    next(error);
+  }
 }
 }
