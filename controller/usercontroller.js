@@ -9,20 +9,28 @@ const { Client } = require('@elastic/elasticsearch');
 const createbulk = require('./../middleware/createbulk.js')
 const client = new Client({ node: 'http://localhost:9200' });
 const emailVerification = require('./../middleware/emailVerification.js');
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./../middleware/blog-application-393304-firebase-adminsdk-a8fm8-c5500e9d6c.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 module.exports = {
   signup: async (req, res, next) => {
     try {
       const email = req.body.email;
       const checkuser = await User.findOne({ email: req.body.email });
-      if (checkuser !== null) {
-        const err = new errorhandler(
-          "user already exists",
-          403,
-          "BAD REQUEST",
-          { addtionaldata: "please sign in because you already registerd" }
-        );
-        next(err);
-      }
+      // if (checkuser !== null) {
+      //   const err = new errorhandler(
+      //     "user already exists",
+      //     403,
+      //     "BAD REQUEST",
+      //     { addtionaldata: "please sign in because you already registerd" }
+      //   );
+      //   next(err);
+      // }
       const newuser = new User({
         username: req.body.username,
         email: req.body.email,
@@ -35,12 +43,20 @@ module.exports = {
         next(err);
       } 
       if(saveduser){
-    emailVerification.verifyemail(saveduser.email,saveduser.username);
-        res.status(200).json({
-          message: "you are registered successfully please verify your email",
-          user: saveduser,
-        });
-      }
+   const isSent =await emailVerification.verifyemail(saveduser.email,saveduser.username,saveduser.phoneNumber);
+   console.log("issent is "+isSent)
+    if(isSent === undefined){
+      console.log('issent true')
+      
+          res.status(200).json({
+            message: "you are registered successfully please verify your email",
+            user: saveduser,
+          });
+        }
+    }
+    else{
+      console.log('email not sent')
+    }
     } catch (error) {
       next(error)
     }
