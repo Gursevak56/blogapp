@@ -1,44 +1,65 @@
 const User = require("./../models/user.js");
 const Blog = require("./../models/blog");
+const Otp = require('./../models/otp.js')
 const errorhandler = require('./../middleware/errorhandler')
 const path = require('path')
 const jwt = require('jsonwebtoken');
 const { json } = require("body-parser");
 const { Client } = require('@elastic/elasticsearch');
+const createbulk = require('./../middleware/createbulk.js')
+const client = new Client({ node: 'http://localhost:9200' });
+const emailVerification = require('./../middleware/emailVerification.js');
+var admin = require("firebase-admin");
+const razorpay = require('razorpay');
+
+var serviceAccount = require("./../middleware/blog-application-393304-firebase-adminsdk-a8fm8-c5500e9d6c.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
 module.exports = {
   signup: async (req, res, next) => {
     try {
       const email = req.body.email;
-      console.log(email);
       const checkuser = await User.findOne({ email: req.body.email });
-      console.log(checkuser);
-      if (checkuser !== null) {
-        const err = new errorhandler(
-          "user already exists",
-          403,
-          "BAD REQUEST",
-          { addtionaldata: "please sign in because you already registerd" }
-        );
-        next(err);
-      }
-      console.log("it is a else block");
+      // if (checkuser !== null) {
+      //   const err = new errorhandler(
+      //     "user already exists",
+      //     403,
+      //     "BAD REQUEST",
+      //     { addtionaldata: "please sign in because you already registerd" }
+      //   );
+      //   next(err);
+      // }
       const newuser = new User({
         username: req.body.username,
-        password: req.body.password,
-        confirmpassword: req.body.confirmpassword,
         email: req.body.email,
         phoneNumber: req.body.phoneNumber,
         isadmin: req.body.isadmin,
       });
       const saveduser = await newuser.save();
-      res.status(200).json({
-        message: "user registered successfully",
-        user: saveduser,
-      });
+      if(!saveduser){
+        const err = new errorhandler('user not saved');
+        next(err);
+      } 
+      if(saveduser){
+   const isSent =await emailVerification.verifyemail(saveduser.email,saveduser.username,saveduser.phoneNumber);
+   console.log("issent is "+isSent)
+    if(isSent === undefined){
+      console.log('issent true')
+      
+          res.status(200).json({
+            message: "you are registered successfully please verify your email",
+            user: saveduser,
+          });
+        }
+    }
+    else{
+      console.log('email not sent')
+    }
     } catch (error) {
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error)
     }
   },
   signin: async (req, res, next) => {
@@ -65,15 +86,17 @@ module.exports = {
         next(err);
       }
       req.session.user = checkuser;
-      const token = await jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
+      if(req.session.user){
+      const token =  jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
       req.user=checkuser;
       console.log(req.session.user._id);
       res.status(200).json({
         message: "user log in successfully",
-        user: checkuser,
+        user: req.session.user,
         token,
         cookies: req.cookies,
       });
+    }
     } catch (error) {
       next(error);
     }
@@ -134,7 +157,7 @@ module.exports = {
         next(err);
       });
   },
-  like: async (req, res) => {
+  like: async (req, res,next) => {
     const blogid = req.params.id;
     console.log(blogid);
     const like = await Blog.findByIdAndUpdate(
@@ -247,22 +270,55 @@ module.exports = {
       next(error);
     }
   },
-  searchdata:async (req,res,next)=>{
-    const client = new Client({
-      // Elasticsearch server configuration
-      node: 'http://localhost:9200', // Replace with your Elasticsearch server URL
-    });
-    const query = req.body.query;
-    const {body:response} = await client.search({
-      index:"username",
+  searchdata: async (req,res)=>{
+    try {
+      const q = req.body.query;
+      await createbulk.createbulk();
+      const {body:searchresponse} = await client.search({
+        index:"data",
+        body:{
+          query:{
+            match:{
+              username:q
+            }
+          }
+        }
+      })
+      console.log(searchresponse)
+      res.json({data:searchresponse.hits.hits})
+    }
+    catch (error) {
+      console.log(error.message)
+    }
+  },
+  searchblogdata:async (req,res,next)=>{
+    try {
+      await createbulk.createBlogBluk()
+    const title = req.body.title;
+    const content = req.body.content;
+    const {body:response } = await client.search({
+      index:'blog',
       body:{
         query:{
           match:{
-            username:'gursevak'
+            // title:title,
+             content:content
           }
         }
       }
     })
-    console.log(response.hits.hits)
+    console.log(response.hits.hits);
+    res.json({data:response.hits.hits})
+  
+    } catch (error) {
+      console.log(error.message);
+    }
+},
+razorpay:async (req,res,next)=>{
+  try {
+    const instance = new razorpay(process.env.KEY_ID,process.env.KEY_SECRET)
+  } catch (error) {
+    next(error);
   }
-};
+}
+}

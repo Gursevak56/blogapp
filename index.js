@@ -38,7 +38,6 @@ app.use(session({
     resave:false
 }))
 app.use(passport.initialize());
-app.use(passport.session())
 //routers
 app.use('/',userrouter);
 app.use((err,req,res,next)=>{

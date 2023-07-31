@@ -11,11 +11,13 @@ router.post('/signin',authenticate.islogout,usercontroller.signin);
 router.get('/logout',authenticate.islogin,usercontroller.logout)
 router.post('/addblog',authenticate.islogin,usercontroller.addblog);
 router.get('/like/:id',authenticate.islogin,usercontroller.like);       
-router.get('/allblogs',usercontroller.allblogs);
+router.get('/allblogs',authenticate.islogout,usercontroller.allblogs);
 router.post('/comment/:id',authenticate.islogin,usercontroller.comment)
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email','https://www.googleapis.com/auth/user.phonenumbers.read']}));
 router.get('/callback',passport.authenticate('google',{successRedirect:'/profile',failureRedirect:'/signup'}))
 router.get('/profile',usercontroller.profile);
-router.put('/deleteblog/:id',authenticate.isadmin||authenticate.userauthorizationl,usercontroller.deleteblog)
-router.post('/auth/search',usercontroller.searchdata);
+router.put('/deleteblog/:id',authenticate.isadmin||authenticate.userauthorization,usercontroller.deleteblog)
+router.post('/auth/search',authenticate.islogin,usercontroller.searchdata);
+router.post('/auth/blogsearch',authenticate.islogin,usercontroller.searchblogdata);
+router.get('/razorpay',authenticate.islogin,usercontroller.razorpay);
 module.exports = router;
