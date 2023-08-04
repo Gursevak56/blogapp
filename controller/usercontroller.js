@@ -11,7 +11,7 @@ const client = new Client({ node: 'http://localhost:9200' });
 const emailVerification = require('./../middleware/emailVerification.js');
 var admin = require("firebase-admin");
 const razorpay = require('razorpay');
-
+const Payment = require('./../models/payment.js')
 var serviceAccount = require("./../middleware/blog-application-393304-firebase-adminsdk-a8fm8-c5500e9d6c.json");
 
 admin.initializeApp({
@@ -89,7 +89,6 @@ module.exports = {
       if(req.session.user){
       const token =  jwt.sign({userid:checkuser._id},process.env.JWT_SECRET,{expiresIn:'1m'});
       req.user=checkuser;
-      console.log(req.session.user._id);
       res.status(200).json({
         message: "user log in successfully",
         user: req.session.user,
@@ -316,9 +315,21 @@ module.exports = {
 },
 razorpay:async (req,res,next)=>{
   try {
-    const instance = new razorpay(process.env.KEY_ID,process.env.KEY_SECRET)
+    const amount =req.body.amount;
+    const instance = new razorpay({key_id:process.env.KEY_ID,key_secret:process.env.KEY_SECRET});
+    const options = {
+      amount:amount*100,
+      currency:'INR'
+    }
+    const order = await instance.orders.create(options);
+    const savedorder = new Payment({
+      paymentId:order.id,
+      amount:order.amount
+    })
+    await savedorder.save();
+    res.render()
   } catch (error) {
-    next(error);
+    console.log(error)
   }
 }
 }
